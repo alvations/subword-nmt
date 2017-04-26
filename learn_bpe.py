@@ -77,9 +77,11 @@ def update_pair_statistics(pair, changed, stats, indices):
     new_pair = first+second
     for j, word, old_word, freq in changed:
 
-        # find all instances of pair, and update frequency/indices around it
+        # Find all instances of pair in the old_word, and update frequency/indices around it
         i = 0
-        while True:
+        # Keep moving down the old_word string until we cannot find 
+        # the first char in the new_pair.
+        while True: 
             try:
                 # Find the next occurence of the first character in the new_pair.
                 i = old_word.index(first, i)
@@ -89,10 +91,10 @@ def update_pair_statistics(pair, changed, stats, indices):
             # (i) `i < len(old_word)-1` checks that the index i is not the last character.
             # (ii) `old_word[i+1]` checks that the char after the index is the second char in the new_pair.
             if i < len(old_word)-1 and old_word[i+1] == second:
-                # `if i` checks that i is non-zero.
-                # @rico: Actually, is this a bug or feature, `if i` means that 
-                #        if the new_pair is at the start of the string, it will be ignored.
-                if i: 
+                # `if i` checks that i is non-zero. 
+                # We can skip the first char since there's no previous bigram.
+                if i:
+                    # Find the previous bigram and reduce its count. 
                     prev = old_word[i-1:i+1]
                     stats[prev] -= freq
                     indices[prev][j] -= 1
@@ -107,6 +109,7 @@ def update_pair_statistics(pair, changed, stats, indices):
                     # `i >= len(old_word)-3` checks that the i index is one of the last 4 chars in old_word.
                     # @rico: Is the `i >= len(old_word)-3` check to avoid IndexError?
                     if old_word[i+2] != first or i >= len(old_word)-3 or old_word[i+3] != second:
+                        # Find the next bigram and reduce its count.
                         # `nex` is the next bigram after new_pair.
                         nex = old_word[i+1:i+3]
                         stats[nex] -= freq
@@ -117,21 +120,34 @@ def update_pair_statistics(pair, changed, stats, indices):
             else: # Otherwise, we move one char to the right.
                 i += 1
 
+        # Find all instances of pair in the new *word*, and update frequency/indices around it
+        # Reset the index to the start of the string.
         i = 0
+        # Similarly, we keep moving down the new *word* string until we cannot find 
+        # the first char in the new_pair.
         while True:
             try:
                 i = word.index(new_pair, i)
             except ValueError:
                 break
-            if i:
+            # We are sure that the new_pair is in the new *word* so there's no need to
+            # do an outer check as what was done in the old_word.
+            if i: # `if i` checks that i is non-zero, skip the first char since there's no previous bigram.
                 prev = word[i-1:i+1]
+                # This time, we add the frequency back to the statistics and indices.
                 stats[prev] += freq
                 indices[prev][j] += 1
-            # don't double-count consecutive pairs
+            # The multiple if conditions that follows checks that the bigram after i and i+1 
+            # is not the same as new_pair to avoid double-counting consecutive pairs.
+            # `i < len(word)-1` checks if i is not the last character.
+            # `word[i+1]` checks that the next char is not the new_pair.
             if i < len(word)-1 and word[i+1] != new_pair:
+                # `nex` is the next bigram after new_pair.
                 nex = word[i:i+2]
+                # We add the frequency back to the statistics and indices.
                 stats[nex] += freq
                 indices[nex][j] += 1
+            # We move one char down the new *word*
             i += 1
 
 
