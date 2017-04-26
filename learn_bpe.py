@@ -102,11 +102,11 @@ def update_pair_statistics(pair, changed, stats, indices):
                 if i < len(old_word)-2:
                     # The multiple if conditions that follows checks that the bigram after i and i+1 
                     # is not the same as new_pair to avoid double-counting consecutive pairs.
-                    # `old_word[i+2] != first` checks that two chars after i, it isn't the same as 
+                    # (i)   `old_word[i+2] != first` checks that two chars after i, it isn't the same as 
                     #                          the first char in the new_pair.
-                    # `old_word[i+3] != second` checks that three chars after i, it isn't the same 
-                    #                           as the second char in the new_pair.
-                    # `i >= len(old_word)-3` checks that the i index is one of the last 4 chars in old_word.
+                    # (ii)  `old_word[i+3] != second` checks that three chars after i, it isn't the same 
+                    #                         as the second char in the new_pair.
+                    # (iii) `i >= len(old_word)-3` checks that the i index is one of the last 4 chars in old_word.
                     # @rico: Is the `i >= len(old_word)-3` check to avoid IndexError?
                     if old_word[i+2] != first or i >= len(old_word)-3 or old_word[i+3] != second:
                         # Find the next bigram and reduce its count.
