@@ -81,22 +81,40 @@ def update_pair_statistics(pair, changed, stats, indices):
         i = 0
         while True:
             try:
+                # Find the next occurence of the first character in the new_pair.
                 i = old_word.index(first, i)
             except ValueError:
                 break
+            # Checks that old_word[i:i+1] is the same as new_pair.
+            # (i) `i < len(old_word)-1` checks that the index i is not the last character.
+            # (ii) `old_word[i+1]` checks that the char after the index is the second char in the new_pair.
             if i < len(old_word)-1 and old_word[i+1] == second:
-                if i:
+                # `if i` checks that i is non-zero.
+                # @rico: Actually, is this a bug or feature, `if i` means that 
+                #        if the new_pair is at the start of the string, it will be ignored.
+                if i: 
                     prev = old_word[i-1:i+1]
                     stats[prev] -= freq
                     indices[prev][j] -= 1
+                # `if < len(old_word)-2` checks that the new_pair is not at the end of the old_word.
                 if i < len(old_word)-2:
-                    # don't double-count consecutive pairs
+                    # The multiple if conditions that follows checks that the bigram after i and i+1 
+                    # is not the same as new_pair to avoid double-counting consecutive pairs.
+                    # `old_word[i+2] != first` checks that two chars after i, it isn't the same as 
+                    #                          the first char in the new_pair.
+                    # `old_word[i+3] != second` checks that three chars after i, it isn't the same 
+                    #                           as the second char in the new_pair.
+                    # `i >= len(old_word)-3` checks that the i index is one of the last 4 chars in old_word.
+                    # @rico: Is the `i >= len(old_word)-3` check to avoid IndexError?
                     if old_word[i+2] != first or i >= len(old_word)-3 or old_word[i+3] != second:
+                        # `nex` is the next bigram after new_pair.
                         nex = old_word[i+1:i+3]
                         stats[nex] -= freq
                         indices[nex][j] -= 1
+                # Now we move the ith index to two chars to the right when 
+                # old_word[i:i+1] is the same as new_pair.
                 i += 2
-            else:
+            else: # Otherwise, we move one char to the right.
                 i += 1
 
         i = 0
