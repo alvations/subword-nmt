@@ -1,0 +1,16 @@
+sudo: false
+
+language: python
+
+dist: bionic
+
+python:
+  - "2.7"
+  - "3.5"
+  - "3.6"
+  - "3.7"
+
+cache: pip
+
+script:
+  - python setup.py test -v
